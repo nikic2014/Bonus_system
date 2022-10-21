@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="/eel.js"></script>
+    <!--<script type="text/javascript" src="js.js"></script>-->
+    <link href="main.css" rel="stylesheet">
+</head>
+<body>
+    <section class = "central_frame" id = "test">
+        <div class = "mainblock">
+            <button class="gui_add_client" tupe="submit" onclick="openForm1()">Добавить пользователя</button>
+
+
+            <div class="form-add" id="myForm">
+                <button class ="button_close" type="button" onclick="closeForm1()">×</button>
+
+                <form action="#" id = "add_new_client">
+                    <input id ="form_data1" class="form_data" type="text" name="familia" placeholder="Фамилия" required>
+                    <input id ="form_data2" class="form_data" type="text" name="name" placeholder="Имя" required>
+                    <input id ="form_data3" class="form_data" type="text" name="otchestvo" placeholder="Отчество" required>
+
+                    <input id ="form_data4" class="form_data" type="tel" name="telephone" placeholder="Телефон" required>
+
+                    <input id ="form_data5" class="form_data" type="born" name="date_of_born" placeholder="Дата рождения" required>
+
+                    <button id = "save" class="form_data" tupe="submit">Сохранить пользователя</button>
+                </form>
+            </div>
+
+            <button class="gui_inc_bonus"  tupe="submit" onclick="openForm2()">Начислить/списать бонусы</button>
+
+            <div class="form-find-inc-dec" id = "myForm2">
+                <button class ="button_close" type="button" onclick="closeForm2()">×</button>
+
+                <form action="#" id = "form-find-inc-dec">
+                    <input id = "find_form_input" class="find_form" type="tel" name="telephone" placeholder="Телофон" required>
+
+                    <button id = "find_button" class="find_form" tupe="submit">Найти пользователя</button>
+                </form>
+
+                <div id="finded_user1"></div>
+                <div id="finded_user2"></div>
+
+                <div id="finder_user3">
+                    <button id="inc" onclick="openForm3(1)">Начислить</button>
+                    <button id="dec" onclick="openForm3(0)">Списать</button>
+                </div>
+            </div>
+
+            <form action="#" id = "last_form_inc_dec">
+                    <button class ="button_close" type="button" onclick="closeForm3()">×</button>
+
+                    <input id = "count_of_bonus" class="find_form"  name="count" placeholder="количество бонусов" required>
+
+                    <button id = "save_bonus" class="find_form" tupe="submit">Применить</button>
+            </form>
+        </div>
+    </section>
+
+    <script type="text/javascript">
+        //alert("Привет");
+        let telephone;
+        let pl_mn;
+
+        <!-- /////////////////////////  ФОРМА ДОБАВЛЕНИЯ ПОЛЬЗОВАТЕЛЯ  //////////////////////////////////////////////////-->
+
+        async function display_info(data) {
+            let res = await eel.write_data(data);
+
+            if (res == "1")
+                alert("Пользователь уже существует");
+            else
+                alert("Пользователь добавлен");
+        }
+        function getFormValue(event) {
+            event.preventDefault();
+            let name = form.querySelector('[name="name"]')
+            let familia = form.querySelector('[name="familia"]')
+            let otchestvo = form.querySelector('[name="otchestvo"]')
+            telephone = form.querySelector('[name="telephone"]')
+            let date_of_born = form.querySelector('[name="date_of_born"]')
+            let data = telephone.value + ";" + familia.value + ";" + name.value + ";" + otchestvo.value + ";" + date_of_born.value + ";" + "0" + ";";
+            display_info(data);
+        }
+
+        form = document.getElementById('add_new_client');
+        form.addEventListener('submit', getFormValue);
+
+         <!-- /////////////////////////  ФОРМА ПОИСКА ПОЛЬЗОВАТЕЛЯ  //////////////////////////////////////////////////-->
+
+
+        async function find_user(data) {
+            let res = await eel.find_user(data)();
+
+            if (res == "no user") {
+                alert("Пользователь не найден");
+            }
+            else {
+                document.getElementById("myForm2").style.height = "60%";
+                document.getElementById("finded_user1").style.display = "block";
+                document.getElementById("finded_user2").style.display = "block";
+                document.getElementById("inc").style.display = "inline-block";
+                document.getElementById("dec").style.display = "inline-block";
+
+
+                let a = res.split(';');
+
+
+                document.getElementById("finded_user1").innerHTML = a[1] + "\n" + a[2] + "\n" + a[3] + '\n' + a[4];
+                document.getElementById("finded_user2").innerHTML = a[5] + " " + "бонусов";
+
+                console.log(a);
+            }
+        }
+
+        function getFormValue2(event) {
+            event.preventDefault();
+            telephone = form2.querySelector('[name="telephone"]')
+            find_user(telephone.value);
+        }
+
+        form2 = document.getElementById('form-find-inc-dec');
+        form2.addEventListener('submit', getFormValue2);
+
+
+    <!--////////////////////////// Функция начисления списания бонусов  //////////////////////////////////////////////-->
+
+    async function change_bonus(cnt) {
+        console.log(pl_mn);
+        let res = await eel.inc_dec(telephone.value, cnt, pl_mn)();
+        if (pl_mn == 1)
+            alert("Бонусы начислены");
+        else
+            alert("Бонусы списаны");
+        console.log(res);
+        document.getElementById("finded_user2").innerHTML = res + " бонусов";
+    }
+
+    function getFormValue3(event) {
+        event.preventDefault();
+        let count = form3.querySelector('[name="count"]');
+        change_bonus(count.value);
+    }
+
+
+    form3 = document.getElementById('last_form_inc_dec');
+    form3.addEventListener('submit', getFormValue3);
+
+
+    <!-- /////////////////////////  Функции открытия закрытия форм  //////////////////////////////////////////////////-->
+
+
+        function openForm1() {
+            document.getElementById("myForm").style.display = "block";
+            for (let i = "1"; i < "6"; i++) {
+                 document.getElementById("form_data" + i).value = "";
+            }
+
+        }
+
+        function closeForm1() {
+            document.getElementById("myForm").style.display = "none";
+        }
+        function openForm2() {
+            document.getElementById("myForm2").style.display = "block";
+        }
+
+        function closeForm2() {
+            document.getElementById("myForm2").style.display = "none";
+            document.getElementById("myForm2").style.height = "30%";
+            document.getElementById("finded_user1").innerHTML = "";
+            document.getElementById("find_form_input").value = "";
+            document.getElementById("finded_user1").style.display = "none";
+            document.getElementById("finded_user2").style.display = "none";
+            document.getElementById("inc").style.display = "none";
+            document.getElementById("dec").style.display = "none";
+        }
+
+        function openForm3(sign) {
+            document.getElementById("last_form_inc_dec").style.display = "block";
+            document.getElementById("count_of_bonus").value = "";
+            console.log(sign);
+            if (sign)
+                pl_mn = 1;
+            else
+                pl_mn = -1;
+        }
+        function closeForm3() {
+            document.getElementById("last_form_inc_dec").style.display = "none";
+        }
+
+    </script>
+<!--<script src="jquery-3.5.1.min.js"></script>
+    <script src="main.js"></script>-->
+</body>
+</html>
