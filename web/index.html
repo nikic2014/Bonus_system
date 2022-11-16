@@ -23,7 +23,7 @@
 
                     <input id ="form_data4" class="form_data" type="tel" name="telephone" placeholder="Телефон" required>
 
-                    <input id ="form_data5" class="form_data" type="born" name="date_of_born" placeholder="Дата рождения" required>
+                    <input id ="form_data5" class="form_data" type="born" name="date_of_born" placeholder="Дата рождения (01.02.2020)" required>
 
                     <button id = "save" class="form_data" tupe="submit">Сохранить пользователя</button>
                 </form>
@@ -56,6 +56,25 @@
 
                     <button id = "save_bonus" class="find_form" tupe="submit">Применить</button>
             </form>
+
+            <button class="gui_del_client" tupe="submit" onclick="openForm4()"> Удалить пользователя </button>
+            <div class="form-del-user" id = "myForm_del">
+                <button class ="button_close" type="button" onclick="closeForm4()">×</button>
+
+                <form action="#" id = "form_del">
+                    <input id = "form-del_input" class="find_form" type="tel" name="telephone" placeholder="Телофон" required>
+
+                    <button id = "form-del_find_button" class="find_form" tupe="submit">Найти пользователя</button>
+                </form>
+
+                <div id="del_finded_user1"></div>
+                <div id="del_finded_user2"></div>
+
+                <div id="del_finder_user3">
+                    <button id = "del_user" class="find_form" tupe="submit" onclick="getFormValue5()">Удалить пользователя</button>
+                </div>
+
+            </div>
         </div>
     </section>
 
@@ -63,6 +82,20 @@
         //alert("Привет");
         let telephone;
         let pl_mn;
+        let bonus = 0;
+
+        async function check(){
+            let test = await eel.check_info()();
+            if (test < 10)
+                 alert("Срочно пополните баланс на сайте sms.ru и перезапустите программу, иначе поздравления не отправятся");
+            else if (test < 50)
+                 alert("Баланс меньше 50 рублей, рекомендуется пополнить его на сайте sms.ru");
+                 else alert("Баланс больше 50 рублей, удачной работы");
+        }
+        check();
+
+        <!-- /////////////////////////  Функция проверки состояния  //////////////////////////////////////////////////-->
+
 
         <!-- /////////////////////////  ФОРМА ДОБАВЛЕНИЯ ПОЛЬЗОВАТЕЛЯ  //////////////////////////////////////////////////-->
 
@@ -110,7 +143,7 @@
 
                 document.getElementById("finded_user1").innerHTML = a[1] + "\n" + a[2] + "\n" + a[3] + '\n' + a[4];
                 document.getElementById("finded_user2").innerHTML = a[5] + " " + "бонусов";
-
+                bonus = a[5];
                 console.log(a);
             }
         }
@@ -130,13 +163,29 @@
     async function change_bonus(cnt) {
         console.log(pl_mn);
         console.log(cnt);
-        let res = await eel.inc_dec(telephone.value, cnt, pl_mn)();
-        if (pl_mn == 1)
-            alert("Бонусы начислены");
-        else
-            alert("Бонусы списаны");
-        console.log(res);
-        document.getElementById("finded_user2").innerHTML = res + " бонусов";
+
+        let proof = cnt.split(' ');
+        if (proof.length < 2 && pl_mn <= 0){
+            alert("Неправильно введено поле списания бонусов, введите сначала сумму покупки, а затем число бонусов через пробел (пример: 100 5)");
+        }
+        else {
+            if (pl_mn <= 0 && proof[0] < proof[1] * 2)
+                alert("Нельзя списать больше половины покупки");
+            else {
+
+                if (pl_mn <= 0 && proof[1] > bonus)
+                    alert("На счету недостаточно бонусов");
+                else {
+                    let res = await eel.inc_dec(telephone.value, cnt, pl_mn)();
+                    if (pl_mn == 1)
+                        alert("Бонусы начислены");
+                    else
+                        alert("Бонусы списаны");
+                    console.log(res);
+                    document.getElementById("finded_user2").innerHTML = res + " бонусов";
+                }
+            }
+        }
     }
 
     function getFormValue3(event) {
@@ -194,6 +243,77 @@
         }
         function closeForm3() {
             document.getElementById("last_form_inc_dec").style.display = "none";
+        }
+
+         <!-- /////////////////////////  Функция удаления пользователя  //////////////////////////////////////////////////-->
+
+        function openForm4() {
+            document.getElementById("myForm_del").style.display = "block";
+        }
+
+        function closeForm4() {
+            document.getElementById("myForm_del").style.display = "none";
+            document.getElementById("form-del_input").value = "";
+
+            document.getElementById("myForm_del").style.display = "none";
+            document.getElementById("myForm_del").style.height = "30%";
+            document.getElementById("del_finded_user1").innerHTML = "";
+            document.getElementById("form-del_input").value = "";
+            document.getElementById("del_finded_user1").style.display = "none";
+            document.getElementById("del_finded_user2").style.display = "none";
+            document.getElementById("del_user").style.display = "none";
+        }
+
+        async function find_user4(data) {
+            let res = await eel.find_user(data)();
+
+            if (res == "no user") {
+                alert("Пользователь не найден");
+            }
+            else {
+                document.getElementById("myForm_del").style.height = "60%";
+                document.getElementById("del_finded_user1").style.display = "block";
+                document.getElementById("del_finded_user2").style.display = "block";
+                document.getElementById("del_user").style.display = "inline-block";
+
+
+                let a = res.split(';');
+
+
+                document.getElementById("del_finded_user1").innerHTML = a[1] + "\n" + a[2] + "\n" + a[3] + '\n' + a[4];
+                document.getElementById("del_finded_user2").innerHTML = a[5] + " " + "бонусов";
+
+                console.log(a);
+            }
+        }
+
+
+        function getFormValue4(event) {
+            event.preventDefault();
+            telephone = form4.querySelector('[name="telephone"]')
+            find_user4(telephone.value);
+        }
+
+        form4 = document.getElementById('form_del');
+        form4.addEventListener('submit', getFormValue4);
+
+
+         async function del_user(data) {
+            let res = await eel.del_user(data)();
+
+            console.log(res);
+
+            if (res == "good") {
+                alert("Пользователь удален");
+                closeForm4();
+            }
+            else {
+                alert("Произошла неизвестная ошибка");
+            }
+        }
+
+        function getFormValue5() {
+            del_user(telephone.value);
         }
 
     </script>
