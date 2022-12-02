@@ -75,6 +75,17 @@
                 </div>
 
             </div>
+
+            <button class="gui_send_all" tupe="submit" onclick="openForm5()"> Отправить сообщение всем покупателям </button>
+            <div class="form_send_all" id = "myForm_send_all">
+                <button class ="button_close" type="button" onclick="closeForm5()">×</button>
+
+                <form action="#" id = "form_send">
+                   <textarea id = "form_send_input" class="find_form" placeholder="Сообщение"></textarea>
+
+                    <button id = "form_send_btn" class="find_form" tupe="submit">Отправить сообщение</button>
+                </form>
+            </div>
         </div>
     </section>
 
@@ -114,7 +125,7 @@
             let otchestvo = form.querySelector('[name="otchestvo"]')
             telephone = form.querySelector('[name="telephone"]')
             let date_of_born = form.querySelector('[name="date_of_born"]')
-            let data = telephone.value + ";" + familia.value + ";" + name.value + ";" + otchestvo.value + ";" + date_of_born.value + ";" + "0" + ";"+ "0" + ";";
+            let data = telephone.value + ";" + familia.value + ";" + name.value + ";" + otchestvo.value + ";" + date_of_born.value + ";" + "0" + ";"+ "0" + ";" + "0" + ";";
             display_info(data);
         }
 
@@ -139,9 +150,9 @@
 
 
                 let a = res.split(';');
+                console.log(a);
 
-
-                document.getElementById("finded_user1").innerHTML = a[1] + "\n" + a[2] + "\n" + a[3] + '\n' + a[4];
+                document.getElementById("finded_user1").innerHTML = a[1] + "\n" + a[2] + "\n" + a[3] + '\n' + a[4] + "\n" + "Сумма всех покупок: " + a[7];
                 document.getElementById("finded_user2").innerHTML = a[5] + " " + "бонусов";
                 bonus = a[5];
                 console.log(a);
@@ -316,6 +327,35 @@
             del_user(telephone.value);
         }
 
+
+        <!-- /////////////////////////  Функция отправки всем сообщения  //////////////////////////////////////////////////-->
+        function openForm5() {
+            document.getElementById("myForm_send_all").style.display = "block";
+        }
+
+        function closeForm5() {
+            document.getElementById("myForm_send_all").style.display = "none";
+            document.getElementById("form_send_input").value  = "";
+        }
+
+        async function send_all(text) {
+            let res = await eel.send_all(text)();
+            if (res == 0) {
+                alert("Недостаточно средств на балансе");
+            }
+            else {
+                alert("Сообщение успешно отправлено всем пользователям");
+            }
+        }
+
+        function getFormValue5(event) {
+            event.preventDefault();
+            text = document.getElementById('form_send_input').value;
+            send_all(text);
+        }
+
+        form5 = document.getElementById('form_send');
+        form5.addEventListener('submit', getFormValue5);
     </script>
 <!--<script src="jquery-3.5.1.min.js"></script>
     <script src="main.js"></script>-->

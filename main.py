@@ -6,8 +6,6 @@ import requests
 
 data = {}
 
-
-
 def rewrite_txt(file):
     f = open(file, 'w+', encoding="utf-8")
     for i in data.keys():
@@ -102,10 +100,12 @@ def inc_dec(key, count, pl_mn):
     d = count.split(' ')
     ans = 0
     if (pl_mn > 0):
-        ans = str(float(data.get(key)[-2]) + 0.05 * int(count))
+        ans = str(float(data.get(key)[-3]) + 0.05 * float(count))
     else:
-        ans = str(float(data.get(key)[-2]) - float(d[1]))
-    data[key][-2] = ans
+        ans = str(float(data.get(key)[-3]) - float(d[1]))
+
+    data[key][6] = str(float(data[key][6]) + float(d[0]))
+    data[key][-3] = ans
     #print(ans)
     return ans
 
@@ -117,6 +117,26 @@ def del_user(key):
         return "good"
     except:
         return "not good"
+
+@eel.expose
+def send_all(text_sms):
+    print(text_sms)
+    for i in data.keys():
+
+        zapros = "https://sms.ru/my/balance?api_id=2C70B7B8-C558-7013-6FA9-687CE0094B94&json=0"
+        response = requests.get(zapros)
+        ans = response.text.split('\n')
+        if float(ans[1]) < len(data * 5.0):
+            return 0
+        else:
+            number = str(i)
+            zapros = f'https://sms.ru/sms/send?api_id=2C70B7B8-C558-7013-6FA9-687CE0094B94&to={number}&msg={text_sms}&json=0&from=VEDANO'
+            response = requests.get(zapros)
+            print(response.text)
+            print(number)
+
+        return 1
+
 
 @eel.expose
 def check_info():
@@ -134,11 +154,10 @@ if __name__ == '__main__':
     try:
         ############################################ тест времени на 100к пользователей
         #test()
-
         read_data('data.txt')
         congratulate()
         eel.init("web")
-        eel.start("index.html", size=(900, 850))
+        eel.start("index.html", size=(900, 900))
     finally:
         rewrite_txt('data.txt')
 
